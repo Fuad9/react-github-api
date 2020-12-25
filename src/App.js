@@ -56,6 +56,7 @@ function App() {
 
    return (
       <div className="App">
+         <h1 className="my-3">Search GitHub Users by Typing User Name</h1>
          <div className="mx-auto d-flex justify-content-center my-5">
             <input
                type="text"
