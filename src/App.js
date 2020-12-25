@@ -2,61 +2,122 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import "./App.css";
-import { addToDatabaseCart, getDatabaseCart } from "./utilities/storageManager";
-import UsersData from "./components/UsersData/UsersData";
+
+import { addToDatabase, getFromDatabase, removeFromDatabase } from "./storageManager";
 
 function App() {
-   const [loaging, setLoading] = useState(false);
    const [user, setUser] = useState({});
    const [search, setSearch] = useState("");
    const [data, setData] = useState({});
+   const [userData, setUserData] = useState({});
 
-   // addToDatabaseCart(user.id, Math.random());
-
-   /* searching github users by user name ======================== */
+   /* Searching github users by user name ======================== */
    useEffect(() => {
       const getData = async () => {
          try {
-            setLoading(true);
             const response = await axios.get(`http://api.github.com/users/${search}`);
             setUser(response.data);
-            setLoading(false);
          } catch (error) {
-            setLoading(false);
+            console.log(error);
          }
       };
       getData();
    }, [search]);
 
-   /* Adding items to cart and setting product Id to local storage ====================== */
-   const handleAddProduct = (prod) => {
-      addToDatabaseCart(prod, Math.random());
+   /* Reloading the page after clicking add or remove button ============================*/
+   const reloadPage = () => {
+      window.location.reload();
    };
 
+   /* Saving user data in the localStorage ====================== */
+   const handleAddProduct = (key, value) => {
+      addToDatabase(key, value);
+
+      reloadPage();
+   };
+
+   /* Retrieving user data from the localStorage ================= */
    useEffect(() => {
-      const getData = getDatabaseCart();
+      const getData = getFromDatabase();
       setData(getData);
    }, []);
 
+   useEffect(() => {
+      const temp = Object.values(data);
+      setUserData(temp.find((finalData) => finalData));
+   }, [data]);
+
+   /* Deleting user data from the localStorage ================= */
+   const handleRemove = (key) => {
+      removeFromDatabase(key);
+
+      reloadPage();
+   };
+
    return (
       <div className="App">
-         <h4>Here starts our app</h4>
-         <input
-            type="text"
-            className="form-control w-50"
-            onBlur={(e) => setSearch(e.target.value)}
-            placeholder="search user"
-         />
+         <div className="mx-auto d-flex justify-content-center my-5">
+            <input
+               type="text"
+               className="form-control w-50"
+               onBlur={(e) => setSearch(e.target.value)}
+               placeholder="search user"
+            />
 
-         <button
-            onClick={() => {
-               handleAddProduct(user.id);
-            }}
-         >
-            ADD
-         </button>
+            {/* Handle adding user data */}
+            <button
+               onClick={() => {
+                  handleAddProduct(user.id, user);
+               }}
+               className="btn btn-primary"
+            >
+               ADD
+            </button>
+         </div>
 
-         <UsersData user={user} />
+         <div className="d-flex justify-content-center" id="myDIV">
+            {userData && (
+               <div>
+                  <div className="w-75">
+                     <img className="w-75" src={userData.avatar_url} alt="" />
+                  </div>
+
+                  <h5>
+                     <span>User Name:</span>
+                     {userData.login} (
+                     <a href={userData.repos_url} alt="">
+                        Repositories
+                     </a>
+                     )
+                  </h5>
+
+                  <h5>
+                     <span>Public Repos:</span>
+                     {userData.public_repos}
+                  </h5>
+
+                  <h5>
+                     <span>Created:</span>
+                     {userData.created_at}
+                  </h5>
+
+                  <h5>
+                     <span>Updated:</span>
+                     {userData.updated_at}
+                  </h5>
+
+                  <h5>
+                     <span>Followers:</span>
+                     {userData.followers}
+                  </h5>
+
+                  {/* Handle deleting user data */}
+                  <button onClick={() => handleRemove(userData.id)} className="btn btn-danger">
+                     REMOVE
+                  </button>
+               </div>
+            )}
+         </div>
       </div>
    );
 }

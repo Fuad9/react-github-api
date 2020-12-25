@@ -1,9 +1,10 @@
+/* Initializing the key ============================ */
 const getUser = () => {
    const existingUser = sessionStorage.getItem("userId");
    if (existingUser) {
       return existingUser;
    } else {
-      const newUser = "user-" + new Date().getTime();
+      const newUser = "user-" + new Date();
       sessionStorage.setItem("userId", newUser);
       return newUser;
    }
@@ -11,33 +12,35 @@ const getUser = () => {
 
 const getDataKey = () => {
    const userId = getUser();
-   return `emaJohn/carts/${userId}`;
+   return `github/users/${userId}`;
 };
 
-// push to local storage: a temporary place for database
-const getDatabaseCart = () => {
+/* pushing data to local storage: a temporary place for database ======================= */
+const addToDatabase = (key, count) => {
+   const currentUser = getFromDatabase();
+   currentUser[key] = count;
+   localStorage.setItem(getDataKey(), JSON.stringify(currentUser));
+};
+
+/* Retrieving data from database ===========================*/
+const getFromDatabase = () => {
    const dataKey = getDataKey();
    const data = localStorage.getItem(dataKey) || "{}";
    return JSON.parse(data);
 };
 
-const addToDatabaseCart = (key, count) => {
-   const currentCart = getDatabaseCart();
-   currentCart[key] = count;
-   localStorage.setItem(getDataKey(), JSON.stringify(currentCart));
+/* Removing data from database ======================= */
+const removeFromDatabase = (key) => {
+   const currentUser = getFromDatabase();
+   delete currentUser[key];
+   localStorage.setItem(getDataKey(), JSON.stringify(currentUser));
 };
 
-const removeFromDatabaseCart = (key) => {
-   const currentCart = getDatabaseCart();
-   delete currentCart[key];
-   localStorage.setItem(getDataKey(), JSON.stringify(currentCart));
-};
+// const processOrder = (cart) => {
+//    localStorage.removeItem(getDataKey());
+// };
 
-const processOrder = (cart) => {
-   localStorage.removeItem(getDataKey());
-};
-
-export { addToDatabaseCart, getDatabaseCart, removeFromDatabaseCart, processOrder };
+export { addToDatabase, getFromDatabase, removeFromDatabase };
 
 // polyfill to support older browser
 const localStorage =
