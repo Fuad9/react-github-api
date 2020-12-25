@@ -36,10 +36,6 @@ const removeFromDatabase = (key) => {
    localStorage.setItem(getDataKey(), JSON.stringify(currentUser));
 };
 
-// const processOrder = (cart) => {
-//    localStorage.removeItem(getDataKey());
-// };
-
 export { addToDatabase, getFromDatabase, removeFromDatabase };
 
 // polyfill to support older browser
